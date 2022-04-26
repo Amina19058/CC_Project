@@ -1,96 +1,83 @@
-# Lab 1 (in Java). Untyped expressions, functions and nameless representation
+# Lambda Programming Language
+ 
+**Members:**
+Polina Minina - implements type checker, implements compiler
+Amina Khusnutdinova - implements syntax, implements compiler
+Kseniya Evdokimova - implements syntax, implements tests
+ 
+## General Description:
+Lambda is general-purpose functional interpreted language with support of:
+- variables
+- operations on base types 
+- homogeneous lists
+- user-defined terms and types (user-defined types are structured algebraic data types)
+- auto types
+- first-class functions, functions with multiple arguments
+- nested definitions 
+- subtyping exceptions
+- standard library
+ 
+**User-defined terms and types**
+At least global, structured algebraic data types. The subtypes will be created by using “my_type” keyword, then the name of the name of the new data type, “::” sign and then the new data type will be the “synonym” of the existing type or will be composed with the Sum types of existing types
+**Sequencing**
+t : : = unit | t;t
+**Type Ascription**
+t : : = t as T
+**Let-bindings**
+t : : = let x = t in t
+**Tuples**
+t : : = {t_i} | t.i
+**Records**
+t : : = {d_i = t_i} | t.d
+**Exceptions**
+To raise an exception in our program the “try t1 with t2” structure will be used. The evaluation rules for the error will happen with the use of the call stack, which will consist of a set of activation records for the active function calls. Raising an exception causes activation records to be popped off the call stack until it becomes empty. Exceptions will hold values relying on subtyping.
+ 
+## Operators:
+The grammar allows infix binary notation (the placement of operators between operands). The table below presents precedences of operators:
+<img width="686" alt="image" src="https://user-images.githubusercontent.com/69860125/165295850-dd094d89-522f-4dec-a5d7-66c76e8cf757.png">
 
-_This is a Java version of materials demonstrated in [Lab 1](../lab-01/)._
+## Standard Lambda Language types:
+**> Bool**
+The boolean type Bool is an enumeration. The basic boolean functions are && (and), || (or), and not.
+type Bool  =  False | True
+**> Numeric**
+The numeric type will hold the integer values
+Will be addressed in the program as int
+**>  Characters and Strings**
+The String type is an enumeration whose values represent Unicode characters. Сharacter literals are nullary constructors in the data type Char. A string is a list of characters: 
+type  String  =  [Char]
+**> Lists**
+type  [Bool]  =  [] | (cons Bool [Bool])
+Lists are an algebraic data type. 
+The first constructor is the null list, and the second is “cons” - the first arg is inserted at the beginning of the list. 
+**> Tuples**
+Tuple type is a collection of non-homogeneous elements.
+We will add more later.
 
-In this lab, we discuss implementation of an interpreter for simple untyped expressions with functions, relying on intermediate nameless representation to deal with possible name conflicts.
-
-[![Description of the syntax.](images/normal-bnf.png)](doc/Syntax/Normal.pdf)
-
-The language employs **call-by-name** evaluation strategy.
-
-## Project structure
-
-Syntax for normal and nameless representation of terms is defined using a labelled BNF in files `Syntax/Normal.cf` and `Syntax/Nameless.cf` correspondingly. BNF converter tool is used to generate parser, abstract syntax, and pretty printer automatically.
-
-## How to use
-
-The generated parser `Test` reads standard input, parses a series of expressions separated by a semicolon (`;`), evaluates each expression and prints out the results.
-
-```sh
-echo "(fun (x) { return (pred x) })(succ (succ 0))" | java Syntax.normal.Test
+## Demo program (a small application that will be written in the target language. All of the provided below are valid programs except the last one):
 ```
-```
-Parse Succesful!
+succ succ succ succ succ 0 ;
 
-[Abstract Syntax]
+fun Int sum (Int arg1, Int arg2) 
+  {return arg1 + arg2 } ;
 
-(ProgramExprs [(Application (Abstraction "x" (Pred (Var "x"))) (Succ (Succ ConstZero)))])
+fun Int min (Int arg1, Int arg2) 
+  {if arg1 < arg2 then return arg1
+  else return arg2} ;
 
-[Linearized Tree]
+my_type my_int :: Int
+fun Int min (my_int arg1, Int arg2) 
+  {if arg1 < arg2 then return arg1
+  else return arg2}
+(fun Bool odd? (Int arg) {return (if (equal? (mod arg 2) 0) then False else True)})
 
-fun (x)
-{
-  return pred x}
-```
-
-Some example programs are available in the `examples/` directory:
-
-```sh
-cat examples/booleans.example | java Syntax.normal.Test
-```
-
-```
-Parse Succesful!
-
-[Abstract Syntax]
-
-(ProgramExprs [ConstTrue, ConstFalse, (If ConstTrue ConstFalse ConstTrue), (If (If ConstTrue ConstFalse ConstTrue) ConstFalse ConstTrue)])
-
-[Linearized Tree]
-
-true;
-false;
-if true then false else true;
-if if true then false else true then false else true
-```
-
-## How to build
-
-### Prerequisites
-
-This lab uses Java programming language, [ANTLRv4](https://www.antlr.org/download.html) parser generator, and [BNF Converter tool](http://bnfc.digitalgrammars.com) for demo implementation.
-
-To install BNF converter tool, follow instructions on their [official website](http://bnfc.digitalgrammars.com). For example, you can use the Stack tool:
-
-```sh
-stack install BNFC
-```
-
-To use BNF converter with the Java implementation, you will also need to install ANTLRv4 (or Cup and JLex). Follow instructions on the official site. You might also be interested in [ANTLR Mega Tutorial](https://tomassetti.me/antlr-mega-tutorial/), in particular its [Setup ANTLR section](https://tomassetti.me/antlr-mega-tutorial/#chapter11).
-
-### Building the interpreter
-
-You probably want to clean up previous build files first:
-
-```sh
-make clean
-```
-
-To run BNF converter, generate source files, run ANTLR, and compile, simply run:
-
-```sh
-make
-```
-
-This should generate `Syntax/normal/Test.class` and `Syntax/nameless/Test.class` files that you can now use to test parsing of the source code in the target language.
-
-### Generating the PDF with syntax description
-
-Run BNF converter with `--latex` option and use `pdflatex` or `latexmk` to compile a PDF.
-Assuming you have `latexmk` and `pdflatex` installed, you can simply run
-
-```sh
-make pdf
+# raises an exception
+(try (if (length `[1, 3, 2, 5, 6]) then False else True) with false)
+# Not a valid program:
+(my_type invalid_type :: Int bool)
+(fun some_unvalid_funct (arg) 
+  {return (if 0 1 
+    then (False + True) 
+    else `[`[2, 3, “a”], 13, 25, `[]])})
 ```
 
-This will generate PDF files `doc/Syntax/Normal.pdf` and `doc/Syntax/Nameless.pdf`.
