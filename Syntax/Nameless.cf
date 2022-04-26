@@ -6,21 +6,19 @@ ProgramExprs. Program ::= [Expr] ;
 
 separator     Expr ";" ;
 
+ConstTrue.    Expr ::= "True" ;
+ConstFalse.   Expr ::= "False" ;
 If.           Expr ::= "if" Expr "then" Expr "else" Expr ;
-Abstraction.  Expr ::= "fun" Type Ident "(" Type Ident ")" "{" "return" Expr "}" ;
 
-Application.  Expr ::= Expr Expr ;
-
+ConstZero.    Expr ::= "0" ;
 Succ.         Expr ::= "succ" Expr ;
 Pred.         Expr ::= "pred" Expr ;
 IsZero.       Expr ::= "iszero" Expr ;
 
-ConstTrue.    Expr ::= "True" ;
-ConstFalse.   Expr ::= "False" ;
-ConstZero.    Expr ::= "0" ;
-
 FreeVar.      Expr ::= Ident ;
-BoundVar.     Expr ::= 
+BoundVar.     Expr ::= Integer ;
+Abstraction.  Expr ::= "fun" Type Ident "(" Type ")" "{" "return" Expr "}" ;
+Application.  Expr ::= Expr Expr ;
 
 _. Expr ::= "(" Expr ")" ;
 
